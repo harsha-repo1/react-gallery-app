@@ -1,0 +1,9 @@
+# Ignore everything in the repository
+*
+
+# Allow the gallery project
+!17-gallery-project/
+!17-gallery-project/**
+
+# Allow .gitignore itself
+!.gitignore
