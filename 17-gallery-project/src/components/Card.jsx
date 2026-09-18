@@ -8,8 +8,7 @@ const Card = ({ elem }) => {
 
             <div className="overflow-hidden rounded-xl bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
 
-                <div className="relative h-40 w-full overflow-hidden bg-gray-800">
-
+<div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-800">
                     {!loaded && (
                         <div className="absolute inset-0 overflow-hidden bg-gray-800">
 
@@ -18,18 +17,16 @@ const Card = ({ elem }) => {
                         </div>
                     )}
 
-                    <img
-                        src={`https://picsum.photos/id/${elem.id}/300/200`}
-                        alt={`Photo by ${elem.author}`}
-                        loading="lazy"
-                        decoding="async"
-                        onLoad={() => setLoaded(true)}
-                        className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                            loaded
-                                ? 'opacity-100'
-                                : 'opacity-0'
-                        }`}
-                    />
+                 <img
+    src={`https://picsum.photos/id/${elem.id}/300/200`}
+    alt={`Photo by ${elem.author}`}
+    loading="lazy"
+    decoding="async"
+    onLoad={() => setLoaded(true)}
+    className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
+        loaded ? 'opacity-100' : 'opacity-0'
+    }`}
+/>
 
                 </div>
 

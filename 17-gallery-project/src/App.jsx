@@ -65,27 +65,21 @@ const App = () => {
         startIndex + itemsPerPage
     )
 
-    const goFirst = () => {
-        setIndex(1)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+const goFirst = () => {
+    setIndex(1)
+}
 
-    const goPrevious = () => {
-        setIndex((prev) => Math.max(prev - 1, 1))
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+const goPrevious = () => {
+    setIndex((prev) => Math.max(prev - 1, 1))
+}
 
-    const goNext = () => {
-        setIndex((prev) =>
-            Math.min(prev + 1, totalPages)
-        )
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+const goNext = () => {
+    setIndex((prev) => Math.min(prev + 1, totalPages))
+}
 
-    const goLast = () => {
-        setIndex(totalPages)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+const goLast = () => {
+    setIndex(totalPages)
+}
 
     return (
         <div className="min-h-screen w-full bg-black text-white px-6 py-5">
@@ -124,8 +118,7 @@ const App = () => {
                 )}
 
                 {loading && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-5">
-
+<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 w-full">
                         {Array.from({ length: 20 }).map((_, i) => (
                             <div
                                 key={i}
@@ -161,8 +154,7 @@ const App = () => {
 
                 {!loading && currentData.length > 0 && (
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-5">
-
+<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 w-full">
                         {currentData.map((item) => (
                             <Card
                                 key={item.id}
