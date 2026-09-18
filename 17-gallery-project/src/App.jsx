@@ -4,146 +4,216 @@ import Card from './components/Card'
 
 const App = () => {
 
-  const [userData, setUserData] = useState([])
-  const [index, setIndex] = useState(1)
-  const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(false)
+    const [allData, setAllData] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [search, setSearch] = useState('')
+    const [index, setIndex] = useState(1)
 
-  // Store already loaded pages
-  const [pageCache, setPageCache] = useState({})
+    const itemsPerPage = 12
 
-  const getData = async (page) => {
+    // Fetch all products only once
+    const getData = async () => {
+        try {
+            setLoading(true)
 
-    // Use cached data if page was already loaded
-    if (pageCache[page]) {
-      setUserData(pageCache[page])
-      return
+            const response = await axios.get(
+                'https://dummyjson.com/products?limit=0'
+            )
+
+            setAllData(response.data.products)
+
+        } catch (error) {
+            console.log('Error fetching data:', error)
+        } finally {
+            setLoading(false)
+        }
     }
 
-    try {
-      setLoading(true)
+    useEffect(() => {
+        getData()
+    }, [])
 
-      const response = await axios.get(
-        `https://picsum.photos/v2/list?page=${page}&limit=12`
-      )
+    // Search title + brand + category
+    const filteredData = allData.filter((item) => {
 
-      setUserData(response.data)
+        const searchText = search.toLowerCase()
 
-      // Save page in cache
-      setPageCache(prev => ({
-        ...prev,
-        [page]: response.data
-      }))
+        return (
+            item.title.toLowerCase().includes(searchText) ||
+            (item.brand &&
+                item.brand.toLowerCase().includes(searchText)) ||
+            item.category.toLowerCase().includes(searchText)
+        )
+    })
 
-    } catch (error) {
-      console.error('Error fetching images:', error)
-    } finally {
-      setLoading(false)
+    // Calculate total pages
+    const totalPages = Math.ceil(
+        filteredData.length / itemsPerPage
+    )
+
+    // Get current page data
+    const startIndex = (index - 1) * itemsPerPage
+
+    const currentData = filteredData.slice(
+        startIndex,
+        startIndex + itemsPerPage
+    )
+
+    // Reset to page 1 when searching
+    const handleSearch = (e) => {
+        setSearch(e.target.value)
+        setIndex(1)
     }
-  }
 
-  useEffect(() => {
-    getData(index)
-  }, [index])
+    return (
 
-  // Search by author name
-  const filteredData = userData.filter((elem) =>
-    elem.author.toLowerCase().includes(search.toLowerCase())
-  )
+        <div className='min-h-screen bg-black text-white p-6'>
 
-  return (
-    <div className='bg-black min-h-screen p-6 text-white'>
+            {/* Heading */}
+            <div className='max-w-7xl mx-auto'>
 
-      {/* Header */}
-      <div className='max-w-7xl mx-auto mb-6'>
+                <h1 className='text-3xl font-bold text-center mb-6'>
+                    Product Gallery
+                </h1>
 
-        <h1 className='text-3xl font-bold mb-5'>
-          React Gallery
-        </h1>
+                {/* Search */}
+                <div className='flex justify-center mb-8'>
 
-        {/* Search */}
-        <div className='flex justify-center mb-6'>
-          <input
-            type='text'
-            placeholder='Search by photographer...'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className='w-full max-w-md px-4 py-3 rounded-lg
-                       bg-gray-800 text-white
-                       outline-none border border-gray-700
-                       focus:border-amber-400'
-          />
+                    <input
+                        type='text'
+                        value={search}
+                        onChange={handleSearch}
+                        placeholder='Search by title, author or category...'
+                        className='w-full max-w-lg px-5 py-3
+                                   rounded-xl
+                                   bg-gray-800
+                                   border border-gray-700
+                                   text-white
+                                   outline-none
+                                   focus:border-amber-400
+                                   transition'
+                    />
+
+                </div>
+
+                {/* Loading Animation */}
+                {loading && (
+
+                    <div className='grid grid-cols-2 sm:grid-cols-3
+                                    md:grid-cols-4 lg:grid-cols-6
+                                    gap-5'>
+
+                        {Array.from({ length: 12 }).map((_, i) => (
+
+                            <div
+                                key={i}
+                                className='animate-pulse'
+                            >
+
+                                <div className='h-40 rounded-xl bg-gray-800' />
+
+                                <div className='h-4 bg-gray-800
+                                                rounded mt-3 w-3/4' />
+
+                                <div className='h-3 bg-gray-800
+                                                rounded mt-2 w-1/2' />
+
+                            </div>
+
+                        ))}
+
+                    </div>
+                )}
+
+                {/* No Results */}
+                {!loading && currentData.length === 0 && (
+
+                    <div className='text-center py-20'>
+
+                        <h2 className='text-xl text-gray-400'>
+                            No products found
+                        </h2>
+
+                        <p className='text-gray-500 mt-2'>
+                            Try another search term.
+                        </p>
+
+                    </div>
+                )}
+
+                {/* Gallery */}
+                {!loading && currentData.length > 0 && (
+
+                    <div className='grid grid-cols-2
+                                    sm:grid-cols-3
+                                    md:grid-cols-4
+                                    lg:grid-cols-6
+                                    gap-5'>
+
+                        {currentData.map((item) => (
+
+                            <Card
+                                key={item.id}
+                                elem={item}
+                            />
+
+                        ))}
+
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {!loading && totalPages > 0 && (
+
+                    <div className='flex justify-center
+                                    items-center gap-6
+                                    mt-10 pb-8'>
+
+                        <button
+                            disabled={index === 1}
+                            onClick={() =>
+                                setIndex(prev => prev - 1)
+                            }
+                            className='px-5 py-2 rounded-lg
+                                       bg-amber-400 text-black
+                                       font-semibold
+                                       disabled:bg-gray-700
+                                       disabled:text-gray-500
+                                       disabled:cursor-not-allowed
+                                       hover:bg-amber-300
+                                       transition'
+                        >
+                            ← Previous
+                        </button>
+
+                        <span className='font-semibold'>
+                            Page {index} of {totalPages}
+                        </span>
+
+                        <button
+                            disabled={index === totalPages}
+                            onClick={() =>
+                                setIndex(prev => prev + 1)
+                            }
+                            className='px-5 py-2 rounded-lg
+                                       bg-amber-400 text-black
+                                       font-semibold
+                                       disabled:bg-gray-700
+                                       disabled:text-gray-500
+                                       disabled:cursor-not-allowed
+                                       hover:bg-amber-300
+                                       transition'
+                        >
+                            Next →
+                        </button>
+
+                    </div>
+                )}
+
+            </div>
+
         </div>
-
-      </div>
-
-      {/* Gallery */}
-      <div className='max-w-7xl mx-auto'>
-
-        {loading && userData.length === 0 && (
-          <div className='flex justify-center py-10'>
-            <p className='text-gray-400'>
-              Loading images...
-            </p>
-          </div>
-        )}
-
-        {!loading && filteredData.length === 0 && (
-          <div className='text-center py-10'>
-            <p className='text-gray-400'>
-              No images found.
-            </p>
-          </div>
-        )}
-
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5'>
-
-          {filteredData.map((elem) => (
-            <Card
-              key={elem.id}
-              elem={elem}
-            />
-          ))}
-
-        </div>
-
-      </div>
-
-      {/* Pagination */}
-      <div className='flex justify-center items-center gap-6 mt-10 pb-6'>
-
-        <button
-          disabled={index === 1 || loading}
-          className={`px-5 py-2 rounded-lg font-semibold transition
-            ${index === 1 || loading
-              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-              : 'bg-amber-400 text-black hover:bg-amber-300 active:scale-95'
-            }`}
-          onClick={() => setIndex(prev => prev - 1)}
-        >
-          ← Prev
-        </button>
-
-        <h4 className='font-semibold min-w-20 text-center'>
-          Page {index}
-        </h4>
-
-        <button
-          disabled={loading}
-          className={`px-5 py-2 rounded-lg font-semibold transition
-            ${loading
-              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-              : 'bg-amber-400 text-black hover:bg-amber-300 active:scale-95'
-            }`}
-          onClick={() => setIndex(prev => prev + 1)}
-        >
-          Next →
-        </button>
-
-      </div>
-
-    </div>
-  )
+    )
 }
 
 export default App
