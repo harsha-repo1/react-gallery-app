@@ -17,22 +17,25 @@ const Card = ({ elem }) => {
                             duration-300
                             hover:-translate-y-1'>
 
-                {/* Image */}
+
+                
                 <div className='relative
                                 h-40
                                 w-full
                                 overflow-hidden
                                 bg-gray-800'>
 
-                    {/* Shimmer */}
+
+ 
                     {!loaded && (
 
-                        <div className='absolute inset-0
+                        <div className='absolute
+                                        inset-0
                                         overflow-hidden
                                         bg-gray-800'>
 
-                            <div className='absolute inset-0
-                                            -translate-x-full
+                            <div className='absolute
+                                            inset-0
                                             animate-[shimmer_1.5s_infinite]
                                             bg-gradient-to-r
                                             from-transparent
@@ -43,12 +46,21 @@ const Card = ({ elem }) => {
 
                     )}
 
+
                     <img
-                        src={elem.thumbnail}
-                        alt={elem.title}
+
+                        src={`https://picsum.photos/id/${elem.id}/300/200`}
+
+                        alt={`Photo by ${elem.author}`}
+
                         loading='lazy'
+
                         decoding='async'
-                        onLoad={() => setLoaded(true)}
+
+                        onLoad={() =>
+                            setLoaded(true)
+                        }
+
                         className={`
                             h-full
                             w-full
@@ -56,48 +68,54 @@ const Card = ({ elem }) => {
                             transition-all
                             duration-500
                             group-hover:scale-105
-                            ${loaded
-                                ? 'opacity-100'
-                                : 'opacity-0'
+
+                            ${
+                                loaded
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
                             }
                         `}
+
                     />
 
                 </div>
 
-                {/* Details */}
+
+                
                 <div className='p-3'>
 
-                    <h2 className='font-semibold
+
+ 
+                    <h2
+                        className='font-semibold
                                    text-sm
                                    truncate'
-                        title={elem.title}
+                        title={elem.author}
                     >
-                        {elem.title}
+
+                        {elem.author}
+
                     </h2>
 
+
+ 
                     <p className='text-xs
                                   text-gray-400
-                                  mt-1
-                                  truncate'
-                    >
-                        {elem.brand || 'Unknown Author'}
+                                  mt-1'>
+
+                        Photo ID: {elem.id}
+
                     </p>
 
-                    <p className='text-xs
-                                  text-amber-400
-                                  mt-1
-                                  capitalize'
-                    >
-                        {elem.category}
-                    </p>
 
                 </div>
 
             </div>
 
         </div>
+
     )
+
 }
 
 export default Card

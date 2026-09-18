@@ -6,214 +6,465 @@ const App = () => {
 
     const [allData, setAllData] = useState([])
     const [loading, setLoading] = useState(true)
+
+    // What the user is currently typing
+    const [searchInput, setSearchInput] = useState('')
+
+    // Search value after 1.5 seconds
     const [search, setSearch] = useState('')
+
     const [index, setIndex] = useState(1)
 
     const itemsPerPage = 12
 
-    // Fetch all products only once
+
+    
+
     const getData = async () => {
+
         try {
+
             setLoading(true)
 
             const response = await axios.get(
-                'https://dummyjson.com/products?limit=0'
+                `https://picsum.photos/v2/list?page=${index}&limit=${itemsPerPage}`
             )
 
-            setAllData(response.data.products)
+            setAllData(response.data)
 
         } catch (error) {
-            console.log('Error fetching data:', error)
+
+            console.log('Error fetching images:', error)
+
         } finally {
+
             setLoading(false)
+
         }
+
     }
+
+
+     useEffect(() => {
+
+        getData()
+
+    }, [index])
+
+
+   
 
     useEffect(() => {
-        getData()
-    }, [])
 
-    // Search title + brand + category
+        const timer = setTimeout(() => {
+
+            setSearch(searchInput)
+
+        }, 1500)
+
+
+         return () => {
+
+            clearTimeout(timer)
+
+        }
+
+    }, [searchInput])
+
+ 
+
     const filteredData = allData.filter((item) => {
 
-        const searchText = search.toLowerCase()
+        const value = search
+            .toLowerCase()
+            .trim()
 
         return (
-            item.title.toLowerCase().includes(searchText) ||
-            (item.brand &&
-                item.brand.toLowerCase().includes(searchText)) ||
-            item.category.toLowerCase().includes(searchText)
+
+            item.author
+                .toLowerCase()
+                .includes(value)
+
+            ||
+
+            item.id
+                .toString()
+                .includes(value)
+
         )
+
     })
 
-    // Calculate total pages
-    const totalPages = Math.ceil(
-        filteredData.length / itemsPerPage
-    )
+ 
 
-    // Get current page data
-    const startIndex = (index - 1) * itemsPerPage
+    const totalPages = 10
 
-    const currentData = filteredData.slice(
-        startIndex,
-        startIndex + itemsPerPage
-    )
+ 
 
-    // Reset to page 1 when searching
-    const handleSearch = (e) => {
-        setSearch(e.target.value)
+    const goFirst = () => {
+
         setIndex(1)
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })
+
     }
+
+
+    const goPrevious = () => {
+
+        setIndex(prev =>
+            Math.max(prev - 1, 1)
+        )
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })
+
+    }
+
+
+    const goNext = () => {
+
+        setIndex(prev =>
+            Math.min(prev + 1, totalPages)
+        )
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })
+
+    }
+
+
+    const goLast = () => {
+
+        setIndex(totalPages)
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })
+
+    }
+
 
     return (
 
         <div className='min-h-screen bg-black text-white p-6'>
 
-            {/* Heading */}
             <div className='max-w-7xl mx-auto'>
 
-                <h1 className='text-3xl font-bold text-center mb-6'>
-                    Product Gallery
+
+                
+
+                <h1 className='text-3xl
+                               font-bold
+                               text-center
+                               mb-4'>
+
+                    React Gallery
+
                 </h1>
 
-                {/* Search */}
-                <div className='flex justify-center mb-8'>
+
+                
+
+                <div className='flex
+                                justify-center
+                                mt-5
+                                mb-8'>
 
                     <input
+
                         type='text'
-                        value={search}
-                        onChange={handleSearch}
-                        placeholder='Search by title, author or category...'
-                        className='w-full max-w-lg px-5 py-3
-                                   rounded-xl
+
+                        value={searchInput}
+
+                        onChange={(e) =>
+                            setSearchInput(e.target.value)
+                        }
+
+                        placeholder='Search photographer or photo ID...'
+
+                        className='w-full
+                                   max-w-lg
+                                   px-6
+                                   py-3
+                                   rounded-full
                                    bg-gray-800
-                                   border border-gray-700
+                                   border-2
+                                   border-gray-700
                                    text-white
                                    outline-none
+                                   transition
+                                   duration-300
                                    focus:border-amber-400
-                                   transition'
+                                   focus:ring-2
+                                   focus:ring-amber-400/20'
+
                     />
 
                 </div>
 
-                {/* Loading Animation */}
-                {loading && (
 
-                    <div className='grid grid-cols-2 sm:grid-cols-3
-                                    md:grid-cols-4 lg:grid-cols-6
-                                    gap-5'>
+                 
 
-                        {Array.from({ length: 12 }).map((_, i) => (
+                {searchInput !== search && (
 
-                            <div
-                                key={i}
-                                className='animate-pulse'
-                            >
+                    <p className='text-center
+                                  text-gray-500
+                                  text-sm
+                                  mb-5'>
 
-                                <div className='h-40 rounded-xl bg-gray-800' />
+                        Searching...
 
-                                <div className='h-4 bg-gray-800
-                                                rounded mt-3 w-3/4' />
+                    </p>
 
-                                <div className='h-3 bg-gray-800
-                                                rounded mt-2 w-1/2' />
-
-                            </div>
-
-                        ))}
-
-                    </div>
                 )}
+ 
+                {search &&
+                    searchInput === search &&
+                    !loading && (
 
-                {/* No Results */}
-                {!loading && currentData.length === 0 && (
+                        <p className='text-gray-400
+                                      text-sm
+                                      mb-5'>
 
-                    <div className='text-center py-20'>
+                            {filteredData.length} result(s)
+                            found for "{search}"
 
-                        <h2 className='text-xl text-gray-400'>
-                            No products found
-                        </h2>
-
-                        <p className='text-gray-500 mt-2'>
-                            Try another search term.
                         </p>
 
-                    </div>
-                )}
+                    )}
+ 
 
-                {/* Gallery */}
-                {!loading && currentData.length > 0 && (
+                {loading && (
 
-                    <div className='grid grid-cols-2
+                    <div className='grid
+                                    grid-cols-2
                                     sm:grid-cols-3
                                     md:grid-cols-4
                                     lg:grid-cols-6
                                     gap-5'>
 
-                        {currentData.map((item) => (
+                        {Array.from({ length: 12 }).map(
+                            (_, i) => (
 
-                            <Card
-                                key={item.id}
-                                elem={item}
-                            />
+                                <div
+                                    key={i}
+                                    className='animate-pulse'
+                                >
 
-                        ))}
+                                    <div className='h-40
+                                                    rounded-xl
+                                                    bg-gray-800' />
 
-                    </div>
-                )}
+                                    <div className='h-4
+                                                    bg-gray-800
+                                                    rounded
+                                                    mt-3
+                                                    w-3/4' />
 
-                {/* Pagination */}
-                {!loading && totalPages > 0 && (
+                                    <div className='h-3
+                                                    bg-gray-800
+                                                    rounded
+                                                    mt-2
+                                                    w-1/2' />
 
-                    <div className='flex justify-center
-                                    items-center gap-6
-                                    mt-10 pb-8'>
+                                </div>
 
-                        <button
-                            disabled={index === 1}
-                            onClick={() =>
-                                setIndex(prev => prev - 1)
-                            }
-                            className='px-5 py-2 rounded-lg
-                                       bg-amber-400 text-black
-                                       font-semibold
-                                       disabled:bg-gray-700
-                                       disabled:text-gray-500
-                                       disabled:cursor-not-allowed
-                                       hover:bg-amber-300
-                                       transition'
-                        >
-                            ← Previous
-                        </button>
-
-                        <span className='font-semibold'>
-                            Page {index} of {totalPages}
-                        </span>
-
-                        <button
-                            disabled={index === totalPages}
-                            onClick={() =>
-                                setIndex(prev => prev + 1)
-                            }
-                            className='px-5 py-2 rounded-lg
-                                       bg-amber-400 text-black
-                                       font-semibold
-                                       disabled:bg-gray-700
-                                       disabled:text-gray-500
-                                       disabled:cursor-not-allowed
-                                       hover:bg-amber-300
-                                       transition'
-                        >
-                            Next →
-                        </button>
+                            )
+                        )}
 
                     </div>
+
                 )}
+
+
+                
+                {!loading &&
+                    searchInput === search &&
+                    filteredData.length === 0 && (
+
+                        <div className='text-center
+                                        py-20'>
+
+                            <h2 className='text-xl
+                                           text-gray-400'>
+
+                                No images found
+
+                            </h2>
+
+                            <p className='text-gray-500 mt-2'>
+
+                                Try another photographer
+                                or photo ID.
+
+                            </p>
+
+                        </div>
+
+                    )}
+
+ 
+                {!loading &&
+                    currentData(filteredData).length > 0 && (
+
+                        <div className='grid
+                                        grid-cols-2
+                                        sm:grid-cols-3
+                                        md:grid-cols-4
+                                        lg:grid-cols-6
+                                        gap-5'>
+
+                            {currentData(filteredData).map(
+                                (item) => (
+
+                                    <Card
+                                        key={item.id}
+                                        elem={item}
+                                    />
+
+                                )
+                            )}
+
+                        </div>
+
+                    )}
+
+
+               
+                {!loading &&
+                    filteredData.length > 0 &&
+                    searchInput === search && (
+
+                        <div className='flex
+                                        justify-center
+                                        items-center
+                                        gap-2
+                                        mt-10
+                                        pb-8
+                                        flex-wrap'>
+
+
+ 
+                            <button
+
+                                onClick={goFirst}
+
+                                disabled={index === 1}
+
+                                className='px-4
+                                           py-2
+                                           rounded-lg
+                                           bg-gray-800
+                                           hover:bg-gray-700
+                                           disabled:opacity-40
+                                           disabled:cursor-not-allowed
+                                           transition'>
+
+                                « First
+
+                            </button>
+
+
+ 
+                            <button
+
+                                onClick={goPrevious}
+
+                                disabled={index === 1}
+
+                                className='px-4
+                                           py-2
+                                           rounded-lg
+                                           bg-gray-800
+                                           hover:bg-gray-700
+                                           disabled:opacity-40
+                                           disabled:cursor-not-allowed
+                                           transition'>
+
+                                ‹ Prev
+
+                            </button>
+
+
+ 
+                            <span className='px-4
+                                             py-2
+                                             font-semibold
+                                             min-w-24
+                                             text-center'>
+
+                                Page {index}
+
+                            </span>
+
+
+ 
+                            <button
+
+                                onClick={goNext}
+
+                                disabled={index === totalPages}
+
+                                className='px-4
+                                           py-2
+                                           rounded-lg
+                                           bg-gray-800
+                                           hover:bg-gray-700
+                                           disabled:opacity-40
+                                           disabled:cursor-not-allowed
+                                           transition'>
+
+                                Next ›
+
+                            </button>
+
+
+ 
+                            <button
+
+                                onClick={goLast}
+
+                                disabled={index === totalPages}
+
+                                className='px-4
+                                           py-2
+                                           rounded-lg
+                                           bg-gray-800
+                                           hover:bg-gray-700
+                                           disabled:opacity-40
+                                           disabled:cursor-not-allowed
+                                           transition'>
+
+                                Last »
+
+                            </button>
+
+                        </div>
+
+                    )}
 
             </div>
 
         </div>
+
     )
 }
+ 
+
+const currentData = (data) => {
+
+    return data
+
+}
+
 
 export default App
